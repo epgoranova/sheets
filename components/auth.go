@@ -8,6 +8,8 @@ import (
 	"os/user"
 	"path/filepath"
 
+	"github.com/pkg/browser"
+
 	"golang.org/x/oauth2"
 )
 
@@ -57,8 +59,12 @@ func Token(config *oauth2.Config) (*oauth2.Token, error) {
 // input. It returns the retrieved Token.
 func getFromWeb(config *oauth2.Config) (*oauth2.Token, error) {
 	authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
-	fmt.Printf("Go to the following link in your browser then type the "+
-		"authorization code: \n%v\n", authURL)
+
+	fmt.Printf("Authentication link: \n%v\n\n", authURL)
+
+	browser.OpenURL(authURL)
+
+	fmt.Print("Type the authorization code: ")
 
 	var code string
 	if _, err := fmt.Scan(&code); err != nil {
@@ -86,9 +92,8 @@ func getFromFile(filepath string) (*oauth2.Token, error) {
 
 // saveToFile uses a file path to create a file and store the token in it.
 func saveToFile(filepath string, token *oauth2.Token) error {
-	fmt.Printf("Saving credential file to: %s\n", filepath)
-
-	file, err := os.OpenFile(filepath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
+	file, err := os.OpenFile(
+		filepath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, ownerPermissions)
 	if err != nil {
 		return fmt.Errorf("Unable to cache oauth token: %v", err)
 	}

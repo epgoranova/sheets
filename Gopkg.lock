@@ -15,6 +15,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/pkg/browser"
+  packages = ["."]
+  revision = "c90ca0c84f15f81c982e32665bffd8d7aac8f097"
+
+[[projects]]
+  branch = "master"
   name = "golang.org/x/net"
   packages = ["context","context/ctxhttp"]
   revision = "a04bdaca5b32abe1c069418fb7088ae607de5bd0"
@@ -40,6 +46,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "dd91b8f51b30dc020c6a1d1c95e9acbc4acda72ccd10a25ef1f7c71ace2ee6b5"
+  inputs-digest = "a84cc2f1db58cc89d223ea04aa426dafd2b8188776012d221b86d89a846a1e3f"
   solver-name = "gps-cdcl"
   solver-version = 1
