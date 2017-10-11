@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 
 	"golang.org/x/net/context"
@@ -17,6 +16,7 @@ func main() {
 	spreadsheetID := flag.String("spreadsheet", "", "ID of the spreadsheet. (Required)")
 	sheet := flag.String("sheet", "", "Name of the sheet. (Required)")
 	column := flag.String("column", "", "Column letter. (Required)")
+	output := flag.String("output", "", "Output path.")
 	flag.Parse()
 
 	required := []string{"spreadsheet", "sheet", "column"}
@@ -45,5 +45,12 @@ func main() {
 		log.Fatalf("Unable to get column values %v", err)
 	}
 
-	fmt.Println(values)
+	if len(*output) > 0 {
+		if err := components.WriteSliceToFile(*output, values); err != nil {
+			log.Fatalf("Unable to write output to file %v", err)
+		}
+
+	} else {
+		components.WriteSliceToStdout(values)
+	}
 }
