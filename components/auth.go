@@ -13,6 +13,46 @@ import (
 	"golang.org/x/oauth2"
 )
 
+// Token uses a OAuth2 Config to retrieve a Token for the current user. The token
+// is cached locally. If the caching fails, an error is not returned. If the
+// user's permissions change, the cached token must be deleted in order to create
+// a new one.
+func Token(config *oauth2.Config) (*oauth2.Token, error) {
+	cachePath, err := getCachePath()
+	if err != nil {
+		return getFromWeb(config)
+	}
+
+	token, err := getFromFile(cachePath)
+	if err != nil {
+		token, err = getFromWeb(config)
+		if err != nil {
+			return nil, err
+		}
+
+		// Even if saving fails, return the generated token.
+		saveToFile(cachePath, token)
+	}
+
+	return token, nil
+}
+
+// CacheToken generates a new OAuth2 Token and caches it locally. It will return
+// an error if the caching fails.
+func CacheToken(config *oauth2.Config) error {
+	token, err := getFromWeb(config)
+	if err != nil {
+		return err
+	}
+
+	cachePath, err := getCachePath()
+	if err != nil {
+		return err
+	}
+
+	return saveToFile(cachePath, token)
+}
+
 const (
 	// credentialsDir is the name of the directory containing the credentials.
 	credentialsDir = ".credentials"
@@ -24,35 +64,19 @@ const (
 	ownerPermissions = 0700
 )
 
-// Token uses a OAuth2 Config to retrieve a Token for the current user. The token
-// will be cached locally. If the user's permissions change, the cached token must
-// be deleted in order to create a new one.
-func Token(config *oauth2.Config) (*oauth2.Token, error) {
+// getCachePath constructs the path to the local credentials cache.
+func getCachePath() (string, error) {
 	usr, err := user.Current()
 	if err != nil {
-		return nil, fmt.Errorf("Unable to get user info. %v", err)
+		return "", fmt.Errorf("Unable to get user info. %v", err)
 	}
 
 	tokenDir := filepath.Join(usr.HomeDir, credentialsDir)
 	if err := os.MkdirAll(tokenDir, ownerPermissions); err != nil {
-		return nil, err
+		return "", err
 	}
 
-	cacheFile := filepath.Join(tokenDir, url.QueryEscape(tokenFile))
-
-	token, err := getFromFile(cacheFile)
-	if err != nil {
-		token, err = getFromWeb(config)
-		if err != nil {
-			return nil, err
-		}
-
-		if err := saveToFile(cacheFile, token); err != nil {
-			return nil, err
-		}
-	}
-
-	return token, nil
+	return filepath.Join(tokenDir, url.QueryEscape(tokenFile)), nil
 }
 
 // getFromWeb uses the Config to request a Token. It requires additional user
