@@ -5,10 +5,20 @@
 
 Sheets is a command line tool that provides easy reading access to Google Sheets.
 
+## Authentication
+
+```
+./sheets.exe auth
+```
+
+The auth command usually needs to be executed only once - on initial setup. It
+generates a URL which will be opened in yout browser. There you can create an
+authentication code. The code needs to be copied into the shell.
+
 ## Usage
 
 ```
-./sheets.exe -spreadsheet 1qpyC0XzvTcKT6EISywvqESX3A0MwQoFDE8p-Bll4hps -sheet Sheet1 -column A -output ./my-column.txt
+./sheets.exe get -spreadsheet 1qpyC0XzvTcKT6EISywvqESX3A0MwQoFDE8p-Bll4hps -sheet Sheet1 -column A -output ./my-column.txt
 ```
 
 #### Spreadsheet ID
@@ -45,9 +55,3 @@ The `column` parameter is the column to be read from the sheet. It must be a sin
 
 The `output` parameter is the path to the file where the column data will be written.
 Each column value will be written on a new line.
-
-## Authentication
-
-On first run of the tool a URL will be generated. Go to the link in your browser
-and then type the authorization code in the command line. Subsequent runs will
-not require authorization.
